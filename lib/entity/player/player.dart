@@ -3,26 +3,38 @@ import 'package:flame/sprite.dart';
 import 'package:flame/widgets.dart';
 
 class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
-  late final SpriteAnimation _walkingAnimation;
-  final double _animationSpeed = .15;
+  // late final SpriteAnimation _walkingAnimation;
+  // final double _animationSpeed = .15;
 
-  Future<void> _loadAnimations() async {
-    final spriteSheet = SpriteSheet.fromColumnsAndRows(
-      image: await gameRef.images.load('dino-sprite.png'),
-      columns: 10,
-      rows: 1,
-    );
+  // Future<void> _loadAnimations() async {
+  //   final spriteSheet = SpriteSheet.fromColumnsAndRows(
+  //     image: await gameRef.images.load('dino-sprite.png'),
+  //     columns: 10,
+  //     rows: 1,
+  //   );
 
-    //print();
+  //   //print();
 
-    _walkingAnimation = spriteSheet.createAnimation(
-        row: 0, stepTime: _animationSpeed, from: 0, to: 9);
-  }
+  //   _walkingAnimation = spriteSheet.createAnimation(
+  //       row: 0, stepTime: _animationSpeed, from: 0, to: 9);
+  // }
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    await _loadAnimations().then((_) => {animation: _walkingAnimation});
+    //await _loadAnimations().then((_) => {animation: _walkingAnimation});
+
+    size = Vector2(100, 100);
+
+    var spriteAnimationData = SpriteAnimationData.sequenced(
+      amount: 10,
+      stepTime: 0.07,
+      textureSize: Vector2(227.4, 266),
+    );
+
+    animation = await gameRef.loadSpriteAnimation(
+        'dino-sprite2.png', spriteAnimationData);
+    anchor = Anchor.center;
   }
 }
 

@@ -19,8 +19,8 @@ class DinoGame extends FlameGame {
     await add(_dinoPlayer);
     await add(_camera);
 
-    _dinoPlayer.position.x = 20;
-    _dinoPlayer.position.y = _dinoWorld.sizeWorldY * 0.7;
+    _dinoPlayer.position.x = 60;
+    _dinoPlayer.position.y = _dinoWorld.sizeWorldY * 0.78;
 
     camera.followComponent(_camera);
   }
@@ -29,8 +29,8 @@ class DinoGame extends FlameGame {
   void update(double dt) {
     super.update(dt);
 
-    //_camera.position.x += 6;
-    //_dinoPlayer.position.x += 6;
+    _camera.position.x += 5;
+    _dinoPlayer.position.x += 5;
     // print('111');
     // print('${_camera.position} ------ ${_dinoPlayer.size}');
 
