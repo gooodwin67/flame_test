@@ -27,13 +27,13 @@ class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
     size = Vector2(100, 100);
 
     var spriteAnimationData = SpriteAnimationData.sequenced(
-      amount: 10,
-      stepTime: 0.07,
-      textureSize: Vector2(227.4, 266),
+      amount: 8,
+      stepTime: 0.1,
+      textureSize: Vector2(379, 446),
     );
 
-    animation = await gameRef.loadSpriteAnimation(
-        'dino-sprite2.png', spriteAnimationData);
+    animation =
+        await gameRef.loadSpriteAnimation('dino-run3.png', spriteAnimationData);
     anchor = Anchor.center;
   }
 }

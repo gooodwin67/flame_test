@@ -4,9 +4,14 @@ import 'package:flame_test/entity/game/game.dart';
 import 'package:flame_test/entity/player/player.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
-  runApp(MyGame());
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft])
+      .then((_) {
+    runApp(MyGame());
+  });
 }
 
 class MyGame extends StatelessWidget {
@@ -16,6 +21,7 @@ class MyGame extends StatelessWidget {
   Widget build(BuildContext context) {
     final game = DinoGame();
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Stack(
         children: [
           GameWidget(
