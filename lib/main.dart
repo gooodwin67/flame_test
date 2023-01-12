@@ -10,29 +10,71 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft])
       .then((_) {
-    runApp(MyGame());
+    runApp(MyHomePage());
   });
 }
 
-class MyGame extends StatelessWidget {
-  const MyGame({super.key});
+final game = DinoGame();
+
+class MyHomePage extends StatelessWidget {
+  const MyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final game = DinoGame();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Stack(
         children: [
           GameWidget(
             game: game,
-          ),
-          Container(
-            width: 200,
-            height: 2,
-            color: Colors.red,
+            overlayBuilderMap: <String, Widget Function(BuildContext, Game)>{
+              'mainMenuOverlay': (context, game) => MainMenuOverlay(game),
+              'gameOverlay': (context, game) => GameOverlay(game),
+            },
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MainMenuOverlay extends StatelessWidget {
+  const MainMenuOverlay(this.game, {super.key});
+
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Stack(
+        children: [
+          Container(
+            alignment: Alignment.center,
+            child: ElevatedButton(
+              onPressed: () {
+                (game as DinoGame).startGame();
+              },
+              child: Text('Start Game'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GameOverlay extends StatelessWidget {
+  const GameOverlay(this.game, {super.key});
+
+  final Game game;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Stack(
+        children: [],
       ),
     );
   }

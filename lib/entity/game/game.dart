@@ -1,11 +1,27 @@
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame/game.dart';
+
+import 'package:flame_test/animations/animations.dart';
 import 'package:flame_test/entity/player/player.dart';
+import 'package:flame_test/entity/world/floor.dart';
 import 'package:flame_test/entity/world/world.dart';
 import 'package:flutter/material.dart';
 
-class DinoGame extends FlameGame with HasGameRef {
+enum GameState { intro, playing }
+
+class MyTap extends DinoGame with TapDetector {
+  @override
+  bool onTap() {
+    print('asdasd');
+    return true;
+  }
+}
+
+class DinoGame extends FlameGame with HasGameRef, TapDetector {
+  DinoGame({super.children});
   final DinoPlayer _dinoPlayer = DinoPlayer();
+  final DinoFloor _dinoFloor = DinoFloor();
   final MyCamera _camera = MyCamera();
   final Sky _sky = Sky();
   final DinoHugeClouds _dinoHugeClouds = DinoHugeClouds();
@@ -38,9 +54,26 @@ class DinoGame extends FlameGame with HasGameRef {
   final DinoGround _dinoGround = DinoGround();
   final DinoGround _dinoGround2 = DinoGround();
 
+  ////////////////////////////////////////////////////////////
+
+  double speed = 0;
+  double gravity = 1;
+
+  GameState state = GameState.intro;
+
+  bool get isPlaying => state == GameState.playing;
+  bool get isIntro => state == GameState.intro;
+
+  var animationStay;
+  var animationRun;
+
   @override
   Future<void> onLoad() async {
     super.onLoad();
+
+    //add(MyTap());
+
+    overlays.add('mainMenuOverlay');
 
     await add(_sky);
     await add(_dinoHugeClouds);
@@ -61,10 +94,21 @@ class DinoGame extends FlameGame with HasGameRef {
     await add(_dinoTrees2);
     await add(_dinoGround);
     await add(_dinoGround2);
+    await add(_dinoFloor);
     await add(_dinoPlayer);
     await add(_camera);
 
-    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.80;
+    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60;
+    _dinoFloor.position.y =
+        _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 2;
+
+    animationStay = await gameRef.loadSpriteAnimation(
+        'dino-stay.png', Animations().spriteAnimationStay);
+
+    animationRun = await gameRef.loadSpriteAnimation(
+        'dino-run3.png', Animations().spriteAnimationRun);
+
+    _dinoPlayer.animation = animationStay;
 
     camera.followComponent(_camera);
   }
@@ -84,26 +128,41 @@ class DinoGame extends FlameGame with HasGameRef {
   void update(double dt) {
     super.update(dt);
 
-    _camera.position.x += 6;
+    if (isPlaying) {
+      speed = 1;
+      _dinoPlayer.animation = animationRun;
+      if (_dinoPlayer.position.y + _dinoPlayer.size.y / 2 <
+          _dinoFloor.position.y + 13) {
+        gravity += 0.01;
+      }
+    }
+
     _dinoPlayer.position.x =
         _camera.position.x - gameRef.size.x / 2 + _dinoPlayer.size.x / 0.9;
     _sky.position.x = _camera.position.x - _sky.size.x / 2;
-    _dinoTrees.position.x += 2;
-    _dinoTrees2.position.x += 2;
-    _dinoManyTrees.position.x += 4;
-    _dinoManyTrees2.position.x += 4;
-    _dinoBushes.position.x += 5;
-    _dinoBushes2.position.x += 5;
-    _dinoClouds.position.x += 5.5;
-    _dinoCloudsA.position.x += 5.5;
-    _dinoClouds2.position.x += 5.7;
-    _dinoClouds2A.position.x += 5.7;
-    _dinoClouds3.position.x += 5.8;
-    _dinoClouds3A.position.x += 5.8;
-    _dinoHill.position.x += 5.8;
-    _dinoHill2.position.x += 5.8;
-    _dinoHugeClouds.position.x += 5.9;
-    _dinoHugeClouds2.position.x += 5.9;
+    _dinoFloor.position.x = _camera.position.x - gameRef.size.x / 2;
+    _dinoFloor.position.y =
+        _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 3.9;
+
+    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60 * gravity;
+
+    _camera.position.x += 6 * speed;
+    _dinoTrees.position.x += 2 * speed;
+    _dinoTrees2.position.x += 2 * speed;
+    _dinoManyTrees.position.x += 4 * speed;
+    _dinoManyTrees2.position.x += 4 * speed;
+    _dinoBushes.position.x += 5 * speed;
+    _dinoBushes2.position.x += 5 * speed;
+    _dinoClouds.position.x += 5.5 * speed;
+    _dinoCloudsA.position.x += 5.5 * speed;
+    _dinoClouds2.position.x += 5.7 * speed;
+    _dinoClouds2A.position.x += 5.7 * speed;
+    _dinoClouds3.position.x += 5.8 * speed;
+    _dinoClouds3A.position.x += 5.8 * speed;
+    _dinoHill.position.x += 5.8 * speed;
+    _dinoHill2.position.x += 5.8 * speed;
+    _dinoHugeClouds.position.x += 5.9 * speed;
+    _dinoHugeClouds2.position.x += 5.9 * speed;
     // print('111');
     // print('${_camera.position} ------ ${_dinoPlayer.size}');
 
@@ -116,5 +175,11 @@ class DinoGame extends FlameGame with HasGameRef {
     reBackground(_dinoPlayer, _dinoClouds3, _dinoClouds3A);
     reBackground(_dinoPlayer, _dinoHill, _dinoHill2);
     reBackground(_dinoPlayer, _dinoHugeClouds, _dinoHugeClouds2);
+  }
+
+  void startGame() {
+    state = GameState.playing;
+    overlays.add('gameOverlay');
+    overlays.remove('mainMenuOverlay');
   }
 }

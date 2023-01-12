@@ -3,22 +3,6 @@ import 'package:flame/sprite.dart';
 import 'package:flame/widgets.dart';
 
 class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
-  // late final SpriteAnimation _walkingAnimation;
-  // final double _animationSpeed = .15;
-
-  // Future<void> _loadAnimations() async {
-  //   final spriteSheet = SpriteSheet.fromColumnsAndRows(
-  //     image: await gameRef.images.load('dino-sprite.png'),
-  //     columns: 10,
-  //     rows: 1,
-  //   );
-
-  //   //print();
-
-  //   _walkingAnimation = spriteSheet.createAnimation(
-  //       row: 0, stepTime: _animationSpeed, from: 0, to: 9);
-  // }
-
   @override
   Future<void> onLoad() async {
     super.onLoad();
@@ -26,14 +10,20 @@ class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
 
     size = Vector2(100, 100);
 
-    var spriteAnimationData = SpriteAnimationData.sequenced(
+    var spriteAnimationRun = SpriteAnimationData.sequenced(
       amount: 8,
       stepTime: 0.1,
       textureSize: Vector2(379, 446),
     );
 
+    var spriteAnimationStay = SpriteAnimationData.sequenced(
+      amount: 10,
+      stepTime: 0.1,
+      textureSize: Vector2(307, 321),
+    );
+
     animation =
-        await gameRef.loadSpriteAnimation('dino-run3.png', spriteAnimationData);
+        await gameRef.loadSpriteAnimation('dino-run3.png', spriteAnimationRun);
     anchor = Anchor.center;
   }
 }
