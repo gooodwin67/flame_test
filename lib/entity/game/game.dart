@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 
 import 'package:flame_test/animations/animations.dart';
@@ -10,15 +11,7 @@ import 'package:flutter/material.dart';
 
 enum GameState { intro, playing }
 
-class MyTap extends DinoGame with TapDetector {
-  @override
-  bool onTap() {
-    print('asdasd');
-    return true;
-  }
-}
-
-class DinoGame extends FlameGame with HasGameRef, TapDetector {
+class DinoGame extends FlameGame with HasGameRef, HasTappableComponents {
   DinoGame({super.children});
   final DinoPlayer _dinoPlayer = DinoPlayer();
   final DinoFloor _dinoFloor = DinoFloor();
@@ -70,8 +63,6 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-
-    //add(MyTap());
 
     overlays.add('mainMenuOverlay');
 
