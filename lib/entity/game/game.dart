@@ -11,7 +11,27 @@ import 'package:flutter/material.dart';
 
 enum GameState { intro, playing }
 
-class DinoGame extends FlameGame with HasGameRef, HasTappableComponents {
+class TapSquare extends PositionComponent with Tappable {
+  TapSquare({Vector2? position})
+      : super(
+          position: Vector2(100, 100),
+          size: Vector2.all(100),
+        );
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(size.toRect(), Paint()..color = const Color(0xFFA5A5A5));
+  }
+
+  @override
+  bool onTapDown(info) {
+    print('aaa');
+
+    return true;
+  }
+}
+
+class DinoGame extends FlameGame with HasGameRef, HasTappables {
   DinoGame({super.children});
   final DinoPlayer _dinoPlayer = DinoPlayer();
   final DinoFloor _dinoFloor = DinoFloor();
@@ -64,7 +84,7 @@ class DinoGame extends FlameGame with HasGameRef, HasTappableComponents {
   Future<void> onLoad() async {
     super.onLoad();
 
-    overlays.add('mainMenuOverlay');
+    //overlays.add('mainMenuOverlay');
 
     await add(_sky);
     await add(_dinoHugeClouds);
@@ -88,6 +108,7 @@ class DinoGame extends FlameGame with HasGameRef, HasTappableComponents {
     await add(_dinoFloor);
     await add(_dinoPlayer);
     await add(_camera);
+    await add(TapSquare());
 
     _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60;
     _dinoFloor.position.y =
