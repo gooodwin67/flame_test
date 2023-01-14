@@ -11,6 +11,9 @@ import 'package:flutter/material.dart';
 
 enum GameState { intro, playing }
 
+double gravity = 1;
+double speed = 0;
+
 class TapSquare extends PositionComponent with Tappable {
   TapSquare({Vector2? position})
       : super(
@@ -23,12 +26,12 @@ class TapSquare extends PositionComponent with Tappable {
     canvas.drawRect(size.toRect(), Paint()..color = const Color(0xFFA5A5A5));
   }
 
-  @override
-  bool onTapDown(info) {
-    print('aaa');
-
-    return true;
-  }
+  // @override
+  // bool onTapDown(info) {
+  //   print('aaa');
+  //   //speed = 1;
+  //   return true;
+  // }
 }
 
 class DinoGame extends FlameGame with HasGameRef, HasTappables {
@@ -69,9 +72,6 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
 
   ////////////////////////////////////////////////////////////
 
-  double speed = 0;
-  double gravity = 1;
-
   GameState state = GameState.intro;
 
   bool get isPlaying => state == GameState.playing;
@@ -84,7 +84,7 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
   Future<void> onLoad() async {
     super.onLoad();
 
-    //overlays.add('mainMenuOverlay');
+    overlays.add('mainMenuOverlay');
 
     await add(_sky);
     await add(_dinoHugeClouds);
@@ -108,6 +108,9 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
     await add(_dinoFloor);
     await add(_dinoPlayer);
     await add(_camera);
+    _camera.position.y = gameRef.size.y / 2;
+    _camera.size = Vector2(gameRef.size.x, gameRef.size.y);
+
     await add(TapSquare());
 
     _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60;
@@ -121,6 +124,8 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
         'dino-run3.png', Animations().spriteAnimationRun);
 
     _dinoPlayer.animation = animationStay;
+
+    speed = _dinoPlayer.speed;
 
     camera.followComponent(_camera);
   }
@@ -191,7 +196,7 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
 
   void startGame() {
     state = GameState.playing;
-    overlays.add('gameOverlay');
+
     overlays.remove('mainMenuOverlay');
   }
 }

@@ -28,8 +28,7 @@ class MyHomePage extends StatelessWidget {
           GameWidget(
             game: game,
             overlayBuilderMap: <String, Widget Function(BuildContext, Game)>{
-              'mainMenuOverlay': (context, game) => MainMenuOverlay(game),
-              'gameOverlay': (context, game) => GameOverlay(game),
+              'mainMenuOverlay': (context, game) => MainMenuOverlay(game)
             },
           ),
         ],
