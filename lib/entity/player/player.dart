@@ -3,7 +3,6 @@ import 'package:flame/sprite.dart';
 import 'package:flame/widgets.dart';
 
 class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
-  double speed = 0;
   @override
   Future<void> onLoad() async {
     super.onLoad();
@@ -29,7 +28,7 @@ class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
   }
 }
 
-class MyCamera extends PositionComponent with HasGameRef, Tappable {
+class MyCamera extends PositionComponent with HasGameRef {
   MyCamera({Vector2? position}) : super();
 
   @override
@@ -40,12 +39,5 @@ class MyCamera extends PositionComponent with HasGameRef, Tappable {
     Vector2(gameRef.size.x, gameRef.size.y);
     position:
     Vector2(gameRef.size.x / 2, gameRef.size.y / 2);
-  }
-
-  @override
-  bool onTapDown(info) {
-    print('aaa');
-    DinoPlayer().speed = 10;
-    return true;
   }
 }

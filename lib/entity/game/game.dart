@@ -13,28 +13,13 @@ enum GameState { intro, playing }
 
 double gravity = 1;
 double speed = 0;
+double maxSpeed = 1;
+bool isJumping = false;
+bool canTapJump = true;
+double jumpSpeed = 1;
+int jumpHeight = 100;
 
-class TapSquare extends PositionComponent with Tappable {
-  TapSquare({Vector2? position})
-      : super(
-          position: Vector2(100, 100),
-          size: Vector2.all(100),
-        );
-
-  @override
-  void render(Canvas canvas) {
-    canvas.drawRect(size.toRect(), Paint()..color = const Color(0xFFA5A5A5));
-  }
-
-  // @override
-  // bool onTapDown(info) {
-  //   print('aaa');
-  //   //speed = 1;
-  //   return true;
-  // }
-}
-
-class DinoGame extends FlameGame with HasGameRef, HasTappables {
+class DinoGame extends FlameGame with HasGameRef, TapDetector {
   DinoGame({super.children});
   final DinoPlayer _dinoPlayer = DinoPlayer();
   final DinoFloor _dinoFloor = DinoFloor();
@@ -111,8 +96,6 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
     _camera.position.y = gameRef.size.y / 2;
     _camera.size = Vector2(gameRef.size.x, gameRef.size.y);
 
-    await add(TapSquare());
-
     _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60;
     _dinoFloor.position.y =
         _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 2;
@@ -124,8 +107,6 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
         'dino-run3.png', Animations().spriteAnimationRun);
 
     _dinoPlayer.animation = animationStay;
-
-    speed = _dinoPlayer.speed;
 
     camera.followComponent(_camera);
   }
@@ -142,17 +123,43 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
   }
 
   @override
+  bool onTapDown(TapDownInfo info) {
+    print("Player tap down on ${info.eventPosition.game}");
+    if (canTapJump) isJumping = true;
+    canTapJump = false;
+    return true;
+  }
+
+  @override
   void update(double dt) {
     super.update(dt);
+    //print(isJumping);
 
     if (isPlaying) {
-      speed = 1;
+      speed = maxSpeed;
       _dinoPlayer.animation = animationRun;
-      if (_dinoPlayer.position.y + _dinoPlayer.size.y / 2 <
-          _dinoFloor.position.y + 13) {
-        gravity += 0.01;
+
+      if (isJumping) {
+        if (_dinoPlayer.position.y + _dinoPlayer.size.y / 2 >
+            _dinoFloor.position.y - jumpHeight) {
+          gravity -= 0.05 * jumpSpeed;
+          jumpSpeed > 0 ? jumpSpeed -= 0.045 : jumpSpeed = 0.2;
+        } else {
+          isJumping = false;
+        }
+      } else {
+        if (_dinoPlayer.position.y + _dinoPlayer.size.y / 2 <
+            _dinoFloor.position.y + 13) {
+          gravity += 0.05 * jumpSpeed;
+          jumpSpeed < 1 ? jumpSpeed += 0.045 : jumpSpeed = 1;
+        } else {
+          jumpSpeed = 1;
+          canTapJump = true;
+        }
       }
     }
+
+    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60 * gravity;
 
     _dinoPlayer.position.x =
         _camera.position.x - gameRef.size.x / 2 + _dinoPlayer.size.x / 0.9;
@@ -160,8 +167,6 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
     _dinoFloor.position.x = _camera.position.x - gameRef.size.x / 2;
     _dinoFloor.position.y =
         _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 3.9;
-
-    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60 * gravity;
 
     _camera.position.x += 6 * speed;
     _dinoTrees.position.x += 2 * speed;
@@ -180,8 +185,8 @@ class DinoGame extends FlameGame with HasGameRef, HasTappables {
     _dinoHill2.position.x += 5.8 * speed;
     _dinoHugeClouds.position.x += 5.9 * speed;
     _dinoHugeClouds2.position.x += 5.9 * speed;
-    // print('111');
-    // print('${_camera.position} ------ ${_dinoPlayer.size}');
+
+    //print('${_camera.position} ------ ${_dinoPlayer.size}');
 
     reBackground(_dinoPlayer, _dinoGround, _dinoGround2);
     reBackground(_dinoPlayer, _dinoTrees, _dinoTrees2);
