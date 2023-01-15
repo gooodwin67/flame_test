@@ -18,6 +18,7 @@ bool isJumping = false;
 bool canTapJump = true;
 double jumpSpeed = 1;
 int jumpHeight = 100;
+bool playerDown = false;
 
 class DinoGame extends FlameGame with HasGameRef, TapDetector {
   DinoGame({super.children});
@@ -64,6 +65,8 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
 
   var animationStay;
   var animationRun;
+  var animationJump;
+  var animationDown;
 
   @override
   Future<void> onLoad() async {
@@ -106,6 +109,12 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
     animationRun = await gameRef.loadSpriteAnimation(
         'dino-run3.png', Animations().spriteAnimationRun);
 
+    animationJump = await gameRef.loadSpriteAnimation(
+        'dino-jump.png', Animations().spriteAnimationJump);
+
+    animationDown = await gameRef.loadSpriteAnimation(
+        'dino-down.png', Animations().spriteAnimationDown);
+
     _dinoPlayer.animation = animationStay;
 
     camera.followComponent(_camera);
@@ -124,9 +133,23 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
 
   @override
   bool onTapDown(TapDownInfo info) {
-    print("Player tap down on ${info.eventPosition.game}");
-    if (canTapJump) isJumping = true;
-    canTapJump = false;
+    print("Player tap down on ${info.eventPosition.game} ${gameRef.size.y}");
+    if (canTapJump && info.eventPosition.game.y < gameRef.size.y / 2) {
+      isJumping = true;
+      canTapJump = false;
+    } else if (info.eventPosition.game.y > gameRef.size.y / 2) {
+      playerDown = true;
+      _dinoPlayer.size = Vector2(100, 80);
+    }
+
+    return true;
+  }
+
+  @override
+  bool onTapUp(TapUpInfo info) {
+    playerDown = false;
+    _dinoPlayer.size = Vector2(100, 100);
+    //_dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60 - 100;
     return true;
   }
 
@@ -136,10 +159,13 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
     //print(isJumping);
 
     if (isPlaying) {
-      speed = maxSpeed;
-      _dinoPlayer.animation = animationRun;
+      //speed = maxSpeed;
+      !playerDown
+          ? _dinoPlayer.animation = animationRun
+          : _dinoPlayer.animation = animationDown;
 
       if (isJumping) {
+        _dinoPlayer.animation = animationJump;
         if (_dinoPlayer.position.y + _dinoPlayer.size.y / 2 >
             _dinoFloor.position.y - jumpHeight) {
           gravity -= 0.05 * jumpSpeed;
@@ -152,6 +178,7 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
             _dinoFloor.position.y + 13) {
           gravity += 0.05 * jumpSpeed;
           jumpSpeed < 1 ? jumpSpeed += 0.045 : jumpSpeed = 1;
+          _dinoPlayer.animation = animationJump;
         } else {
           jumpSpeed = 1;
           canTapJump = true;
@@ -165,8 +192,7 @@ class DinoGame extends FlameGame with HasGameRef, TapDetector {
         _camera.position.x - gameRef.size.x / 2 + _dinoPlayer.size.x / 0.9;
     _sky.position.x = _camera.position.x - _sky.size.x / 2;
     _dinoFloor.position.x = _camera.position.x - gameRef.size.x / 2;
-    _dinoFloor.position.y =
-        _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 3.9;
+    _dinoFloor.position.y = _dinoGround.sizeWorldY * 0.80 + 100 / 3.9;
 
     _camera.position.x += 6 * speed;
     _dinoTrees.position.x += 2 * speed;
