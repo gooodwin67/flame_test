@@ -13,7 +13,7 @@ class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
     size = Vector2(100, 100);
     anchor = Anchor.center;
 
-    add(RectangleCollidable(Vector2(0, 0)));
+    add(RectangleCollidable(Vector2(0, 10)));
   }
 }
 
@@ -38,8 +38,8 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
 
   RectangleCollidable(Vector2 position)
       : super(
-          position: Vector2(0, 0),
-          size: Vector2.all(100),
+          position: position,
+          size: Vector2(100, 80),
           anchor: Anchor.topLeft,
         );
 

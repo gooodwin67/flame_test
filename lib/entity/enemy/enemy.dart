@@ -13,7 +13,7 @@ class Enemy1 extends SpriteAnimationComponent with HasGameRef {
     size = Vector2(100, 80);
     position = Vector2(gameRef.size.x + gameRef.size.x / 2, 0);
     anchor = Anchor.center;
-    add(RectangleCollidable(Vector2(20, 50)));
+    add(RectangleCollidable(Vector2(20, 35)));
   }
 }
 
@@ -23,7 +23,7 @@ class Enemy2 extends SpriteAnimationComponent with HasGameRef {
     super.onLoad();
 
     size = Vector2(100, 80);
-    position = Vector2(gameRef.size.x + gameRef.size.x * 2, 0);
+    position = Vector2(0 - gameRef.size.x * 3, 0);
     anchor = Anchor.center;
     add(RectangleCollidable(Vector2(0, 30)));
   }

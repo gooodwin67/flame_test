@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/experimental.dart';
@@ -23,6 +25,7 @@ double jumpSpeed = 1;
 int jumpHeight = 100;
 bool playerDown = false;
 bool enemy1Walk = true;
+List enemys = [];
 
 class DinoGame extends FlameGame
     with HasGameRef, TapDetector, HasCollisionDetection {
@@ -106,16 +109,18 @@ class DinoGame extends FlameGame
     await add(_dinoGround2);
     await add(_dinoFloor);
     await add(_dinoPlayer);
-    await add(_enemy1);
-    await add(_enemy2);
+    enemys = [_enemy1, _enemy2];
+    await add(enemys[0]);
+    await add(enemys[1]);
+
     await add(_camera);
 
     _camera.position.y = gameRef.size.y / 2;
     _camera.size = Vector2(gameRef.size.x, gameRef.size.y);
 
     _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.60;
-    _enemy1.position.y = _dinoGround.sizeWorldY * 0.60;
-    _enemy2.position.y = _dinoGround.sizeWorldY * 0.60;
+    enemys[0].position.y = _dinoGround.sizeWorldY * 0.60;
+    enemys[1].position.y = _dinoGround.sizeWorldY * 0.60;
 
     _dinoFloor.position.y =
         _dinoGround.sizeWorldY * 0.80 + _dinoPlayer.size.y / 2;
@@ -221,34 +226,47 @@ class DinoGame extends FlameGame
         }
       }
 
-      if (_enemy1.position.y + _enemy1.size.y / 2 < _dinoFloor.position.y + 3) {
+      if (enemys[0].position.y + enemys[0].size.y / 2 <
+          _dinoFloor.position.y + 3) {
         enemy1Gravity += 0.05;
       }
-      if (_enemy1.position.y + _enemy1.size.y / 2 < _dinoFloor.position.y + 3) {
+      if (enemys[0].position.y + enemys[0].size.y / 2 <
+          _dinoFloor.position.y + 3) {
         enemy2Gravity += 0.05;
       }
 
-      _enemy2.animation = enemy2AnimationFly;
+      enemys[1].animation = enemy2AnimationFly;
 
-      if (_enemy1.position.x < 0 - gameRef.size.x) {
-        _enemy1.position.x = gameRef.size.x + gameRef.size.x / 2;
+      if (enemys[0].position.x < 0 - gameRef.size.x &&
+          enemys[0].position.x > 0 - gameRef.size.x * 1.5) {
+        int random = Random().nextInt(2);
+        enemys[random].position.x = gameRef.size.x + gameRef.size.x / 2;
+        random == 0
+            ? enemys[1].position.x = 0 - gameRef.size.x * 3
+            : enemys[0].position.x = 0 - gameRef.size.x * 3;
       }
-      if (_enemy2.position.x < 0 - gameRef.size.x) {
-        _enemy2.position.x = gameRef.size.x + gameRef.size.x;
+      if (enemys[1].position.x < 0 - gameRef.size.x &&
+          enemys[1].position.x > 0 - gameRef.size.x * 1.5) {
+        int random = Random().nextInt(2);
+        enemys[random].position.x = gameRef.size.x + gameRef.size.x / 2;
+
+        random == 0
+            ? enemys[1].position.x = 0 - gameRef.size.x * 3
+            : enemys[0].position.x = 0 - gameRef.size.x * 3;
       }
-      if (_enemy1.position.x < _dinoPlayer.position.x + gameRef.size.x / 2) {
+      if (enemys[0].position.x < _dinoPlayer.position.x + gameRef.size.x / 2) {
         enemy1Walk = false;
-        _enemy1.animation = enemyAnimationAttack;
+        enemys[0].animation = enemyAnimationAttack;
       } else {
         enemy1Walk = true;
-        _enemy1.animation = enemyAnimationRun;
+        enemys[0].animation = enemyAnimationRun;
       }
     }
     //print(gravity);
 
     _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.61 * gravity;
-    _enemy1.position.y = _dinoGround.sizeWorldY * 0.60 * enemy1Gravity;
-    _enemy2.position.y = _dinoGround.sizeWorldY * 0.45 * enemy2Gravity;
+    enemys[0].position.y = _dinoGround.sizeWorldY * 0.55 * enemy1Gravity;
+    enemys[1].position.y = _dinoGround.sizeWorldY * 0.42 * enemy2Gravity;
 
     _dinoPlayer.position.x =
         _camera.position.x - gameRef.size.x / 2 + _dinoPlayer.size.x / 0.9;
@@ -276,8 +294,10 @@ class DinoGame extends FlameGame
     _dinoHill2.position.x -= 0.8 * speed;
     _dinoHugeClouds.position.x -= 0.9 * speed;
     _dinoHugeClouds2.position.x -= 0.9 * speed;
-    enemy1Walk ? _enemy1.position.x -= 6.8 * speed : _enemy1.position.x -= 5;
-    _enemy2.position.x -= 6.8 * speed;
+    enemy1Walk
+        ? enemys[0].position.x -= 6.8 * speed
+        : enemys[0].position.x -= 5;
+    enemys[1].position.x -= 6.8 * speed;
 
     //print('${_camera.position} ------ ${_dinoPlayer.size}');
 
