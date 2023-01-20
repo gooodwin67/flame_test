@@ -47,7 +47,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
     defaultPaint.color = _defaultColor;
     defaultPaint.style = PaintingStyle.stroke;
     defaultPaint.strokeCap = StrokeCap.round;
-    defaultPaint.strokeWidth = 3;
+    defaultPaint.strokeWidth = 0;
 
     hitbox = RectangleHitbox()
       ..paint = defaultPaint

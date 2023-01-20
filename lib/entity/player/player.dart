@@ -53,10 +53,11 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
   @override
   Future<void> onLoad() async {
     final defaultPaint = Paint();
-    defaultPaint.color = _defaultColor;
-    defaultPaint.style = PaintingStyle.stroke;
+    // defaultPaint.color = _defaultColor;
+    defaultPaint.color = Colors.transparent;
+    // defaultPaint.style = PaintingStyle.stroke;
     defaultPaint.strokeCap = StrokeCap.round;
-    defaultPaint.strokeWidth = 2;
+    defaultPaint.strokeWidth = 0;
 
     hitbox = RectangleHitbox()
       ..paint = defaultPaint
@@ -70,7 +71,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
     PositionComponent other,
   ) {
     super.onCollisionStart(intersectionPoints, other);
-    hitbox.paint.color = _collisionStartColor;
+    //hitbox.paint.color = _collisionStartColor;
     isCollision = true;
   }
 
@@ -78,7 +79,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
   void onCollisionEnd(PositionComponent other) {
     super.onCollisionEnd(other);
     if (!isColliding) {
-      hitbox.paint.color = _defaultColor;
+      //hitbox.paint.color = _defaultColor;
     }
   }
 }
