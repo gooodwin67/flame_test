@@ -5,6 +5,8 @@ import 'package:flame/sprite.dart';
 import 'package:flame/widgets.dart';
 import 'package:flutter/material.dart';
 
+bool isCollision = false;
+
 class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
   @override
   Future<void> onLoad() async {
@@ -13,7 +15,12 @@ class DinoPlayer extends SpriteAnimationComponent with HasGameRef {
     size = Vector2(100, 100);
     anchor = Anchor.center;
 
-    add(RectangleCollidable(Vector2(0, 10)));
+    add(RectangleCollidable(Vector2(30, 0)));
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
   }
 }
 
@@ -39,7 +46,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
   RectangleCollidable(Vector2 position)
       : super(
           position: position,
-          size: Vector2(100, 80),
+          size: Vector2(50, 90),
           anchor: Anchor.topLeft,
         );
 
@@ -49,7 +56,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
     defaultPaint.color = _defaultColor;
     defaultPaint.style = PaintingStyle.stroke;
     defaultPaint.strokeCap = StrokeCap.round;
-    defaultPaint.strokeWidth = 3;
+    defaultPaint.strokeWidth = 2;
 
     hitbox = RectangleHitbox()
       ..paint = defaultPaint
@@ -64,6 +71,7 @@ class RectangleCollidable extends PositionComponent with CollisionCallbacks {
   ) {
     super.onCollisionStart(intersectionPoints, other);
     hitbox.paint.color = _collisionStartColor;
+    isCollision = true;
   }
 
   @override

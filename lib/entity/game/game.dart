@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
 
 import 'package:flame_test/animations/animations.dart';
 import 'package:flame_test/entity/enemy/enemy.dart';
@@ -11,6 +12,7 @@ import 'package:flame_test/entity/player/player.dart';
 import 'package:flame_test/entity/world/floor.dart';
 import 'package:flame_test/entity/world/world.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum GameState { intro, playing }
 
@@ -26,6 +28,8 @@ int jumpHeight = 100;
 bool playerDown = false;
 bool enemy1Walk = true;
 List enemys = [];
+int score = 0;
+int bestScore = 0;
 
 class DinoGame extends FlameGame
     with HasGameRef, TapDetector, HasCollisionDetection {
@@ -66,6 +70,16 @@ class DinoGame extends FlameGame
   final DinoGround _dinoGround = DinoGround();
   final DinoGround _dinoGround2 = DinoGround();
 
+  final scoreStyle = TextPaint(
+      style: TextStyle(
+    color: Color.fromARGB(255, 31, 31, 31),
+    fontSize: 20,
+  ));
+  TextComponent scoreText = TextComponent(
+      text: 'Score: ${score.toString()}', position: Vector2(0, 80));
+  TextComponent bestScoreText = TextComponent(
+      text: 'Best score: ${bestScore.toString()}', position: Vector2(0, 40));
+
   ////////////////////////////////////////////////////////////
 
   GameState state = GameState.intro;
@@ -88,6 +102,14 @@ class DinoGame extends FlameGame
 
     overlays.add('mainMenuOverlay');
 
+    final pref = await SharedPreferences.getInstance();
+    if (pref.containsKey('bestScore')) {
+      bestScore = pref.getInt('bestScore') ?? 0;
+      bestScoreText.text = 'Best score: ${bestScore.toString()}';
+    } else {
+      pref.setInt('bestScore', bestScore);
+    }
+
     await add(_sky);
     await add(_dinoHugeClouds);
     await add(_dinoHugeClouds2);
@@ -108,6 +130,13 @@ class DinoGame extends FlameGame
     await add(_dinoGround);
     await add(_dinoGround2);
     await add(_dinoFloor);
+    await add(scoreText);
+    await add(bestScoreText);
+    bestScoreText.position = Vector2(-bestScoreText.width / 2, 40);
+    scoreText.position =
+        Vector2(-bestScoreText.width / 2, bestScoreText.height + 35);
+    scoreText.textRenderer = scoreStyle;
+    bestScoreText.textRenderer = scoreStyle;
     await add(_dinoPlayer);
     enemys = [_enemy1, _enemy2];
     await add(enemys[0]);
@@ -149,6 +178,15 @@ class DinoGame extends FlameGame
     _dinoPlayer.animation = animationStay;
 
     camera.followComponent(_camera);
+  }
+
+  void startBgmMusic() {
+    FlameAudio.bgm.initialize();
+    FlameAudio.bgm.play('music/bg_music.ogg');
+  }
+
+  void stopBgmMusic() {
+    FlameAudio.bgm.stop();
   }
 
   reBackground(player, world, world2) {
@@ -194,10 +232,16 @@ class DinoGame extends FlameGame
   @override
   void update(double dt) {
     super.update(dt);
-    //print(isJumping);
 
     if (isPlaying) {
+      score += (60 * dt).toInt();
+      scoreText.text = 'Score: ${score.toString()}';
+      bestScore < score ? bestScore = score : bestScore = bestScore;
+
+      bestScoreText.text = 'Best score: ${bestScore.toString()}';
+
       speed = maxSpeed;
+      maxSpeed += 0.00005;
       if (!playerDown) {
         _dinoPlayer.animation = animationRun;
       } else {
@@ -221,7 +265,8 @@ class DinoGame extends FlameGame
           _dinoPlayer.animation = animationJump;
         } else {
           jumpSpeed = 1;
-
+          _dinoPlayer.position.y =
+              _dinoPlayer.size.y / 2 + _dinoFloor.position.y + 11;
           canTapJump = true;
         }
       }
@@ -261,12 +306,22 @@ class DinoGame extends FlameGame
         enemy1Walk = true;
         enemys[0].animation = enemyAnimationRun;
       }
+
+      enemys[0].position.y = _dinoGround.sizeWorldY * 0.55 * enemy1Gravity;
+      enemys[1].position.y = _dinoGround.sizeWorldY * 0.42 * enemy2Gravity;
+
+      enemy1Walk
+          ? enemys[0].position.x -= 6.8 * speed
+          : enemys[0].position.x -= 5;
+      enemys[1].position.x -= 6.8 * speed;
+
+      _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.61 * gravity;
+
+      if (isCollision) {
+        stopGame();
+      }
     }
     //print(gravity);
-
-    _dinoPlayer.position.y = _dinoGround.sizeWorldY * 0.61 * gravity;
-    enemys[0].position.y = _dinoGround.sizeWorldY * 0.55 * enemy1Gravity;
-    enemys[1].position.y = _dinoGround.sizeWorldY * 0.42 * enemy2Gravity;
 
     _dinoPlayer.position.x =
         _camera.position.x - gameRef.size.x / 2 + _dinoPlayer.size.x / 0.9;
@@ -294,10 +349,6 @@ class DinoGame extends FlameGame
     _dinoHill2.position.x -= 0.8 * speed;
     _dinoHugeClouds.position.x -= 0.9 * speed;
     _dinoHugeClouds2.position.x -= 0.9 * speed;
-    enemy1Walk
-        ? enemys[0].position.x -= 6.8 * speed
-        : enemys[0].position.x -= 5;
-    enemys[1].position.x -= 6.8 * speed;
 
     //print('${_camera.position} ------ ${_dinoPlayer.size}');
 
@@ -312,8 +363,42 @@ class DinoGame extends FlameGame
     reBackground(_dinoPlayer, _dinoHugeClouds, _dinoHugeClouds2);
   }
 
+  void stopGame() async {
+    stopBgmMusic();
+    state = GameState.intro;
+    overlays.add('mainMenuOverlay');
+    gravity = 1;
+    enemy1Gravity = 1;
+    enemy2Gravity = 1;
+    speed = 0;
+    maxSpeed = 1;
+    isJumping = false;
+    canTapJump = true;
+    jumpSpeed = 1;
+    jumpHeight = 100;
+    playerDown = false;
+    enemy1Walk = true;
+
+    score = 0;
+    _dinoPlayer.animation = animationStay;
+
+    enemys[1].position.x = 0 - gameRef.size.x * 3;
+    enemys[0].position.x = gameRef.size.x + gameRef.size.x / 2;
+
+    final pref = await SharedPreferences.getInstance();
+    int savedScore = pref.getInt('bestScore')!.toInt();
+    print('$savedScore ------ $bestScore');
+
+    if (savedScore < bestScore) {
+      pref.setInt('bestScore', bestScore);
+    }
+  }
+
   void startGame() {
     state = GameState.playing;
+    startBgmMusic();
+    isCollision = false;
+    score = 0;
 
     overlays.remove('mainMenuOverlay');
   }
