@@ -30,8 +30,8 @@ class Enemy2 extends SpriteAnimationComponent with HasGameRef {
 }
 
 class RectangleCollidable extends PositionComponent with CollisionCallbacks {
-  final _collisionStartColor = Colors.amber;
-  final _defaultColor = Color.fromARGB(255, 29, 177, 49);
+  final _collisionStartColor = Colors.transparent;
+  final _defaultColor = Colors.transparent;
   late ShapeHitbox hitbox;
 
   RectangleCollidable(Vector2 position)
